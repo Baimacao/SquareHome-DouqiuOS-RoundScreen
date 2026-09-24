@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/list_type" android:key="appdrawerListType" />
+    <com.ss.squarehome2.preference.MySwitchPreference android:title="圓屏適配" android:key="douqiuRoundFit" android:summary="列表依圓弧收邊，避免被圓屏切掉（DouqiuOS 適配）" android:defaultValue="true" />
+    <com.ss.squarehome2.preference.MySwitchPreference android:title="圓屏適配：直欄模式" android:key="douqiuRoundFitColumn" android:summary="所有行對齊同一欄（不再逐行貼弧）" android:defaultValue="false" android:dependency="douqiuRoundFit" />
+    <com.ss.squarehome2.preference.MyIntPreference android:title="@string/text_size" android:key="appdrawerListTextSize" android:dependency="appdrawerListType" android:defaultValue="100" />
+    <com.ss.squarehome2.preference.PersistentTypefacePreference android:title="@string/typeface" android:key="appdrawerListTypeface" android:dependency="appdrawerListType" />
+    <com.ss.squarehome2.preference.MyListPreference android:entries="@array/sort_by_entries" android:title="@string/sorting_order" android:key="sortBy" android:defaultValue="0" android:entryValues="@array/sort_by_entry_values" />
+    <com.ss.squarehome2.preference.SmartPickNumPreference android:title="@string/smart_pick_number" android:key="smartPickNum" android:summary="@string/smart_pick_number_summary" android:dependency="sortBy" android:defaultValue="11" />
+    <com.ss.squarehome2.preference.MyListPreference android:entries="@array/sort_in_folder_entries" android:title="@string/sorting_order_in_folder" android:key="sortInFolder" android:defaultValue="1" android:entryValues="@array/sort_in_folder_entry_values" />
+    <com.ss.squarehome2.preference.ResetSortOrderPreference android:persistent="false" android:title="@string/reset_sort_order" android:key="resetSortingOrders" android:summary="@string/reset_sort_order_summary" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/tv_apps" android:key="tvApps" android:summary="@string/tv_apps_summary" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:icon="@drawable/ic_category" android:title="@string/categorize_items" android:key="categorizeItems" android:summary="@string/categorize_items_summary" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/disable_quick_scroll" android:key="appdrawerDisableQS" android:summary="@string/disable_quick_scroll_summary" />
+    <com.ss.squarehome2.preference.BuiltInTagPreference android:title="@string/built_in_tags" android:key="builtInTags" />
+    <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/use_search_index" android:key="appdrawerSP" android:summary="@string/use_search_index_summary" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/vertical_search_index" android:key="appdrawerVSP" android:dependency="appdrawerSP" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/search_in_folder" android:key="searchInFolder" android:summary="@string/search_in_folder_summary" android:defaultValue="true" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/search_english_label" android:key="searchEnLabel" android:summary="@string/search_english_label_summary" android:defaultValue="true" />
+    <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/full_image_on_folder" android:key="fullImageOnFolder" android:defaultValue="true" />
+    <com.ss.squarehome2.preference.ResetIconLabelPreference android:persistent="false" android:title="@string/reset_icon_and_label" android:key="resetIconAndLabel" android:summary="@string/reset_icon_and_label_summary" />
+    <PreferenceCategory android:layout="@layout/l_kit_layout_pref_category" android:title="@string/style">
+        <com.ss.squarehome2.preference.TileStylePreference android:title="@string/tile_style" android:key="appdrawerTileStyle" />
+        <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/customize_menu_colors" android:key="appdrawerCustomMenuColors" />
+        <com.ss.squarehome2.preference.MyColorPreference android:title="@string/menu_bar" android:key="appdrawerMenuBar" android:dependency="appdrawerCustomMenuColors" android:defaultValue="#ffffffff" />
+        <com.ss.squarehome2.preference.MyColorPreference android:title="@string/menu_buttons" android:key="appdrawerMenuButtons" android:dependency="appdrawerCustomMenuColors" android:defaultValue="#ff444444" />
+        <com.ss.squarehome2.preference.MyListPreference android:entries="@array/menu_bar_gravity_entries" android:title="@string/menu_bar_alignment" android:key="appdrawerMenuBarGravity" android:defaultValue="5" android:entryValues="@array/menu_bar_gravity_entry_values" />
+        <com.ss.squarehome2.preference.MySwitchPreference android:icon="@drawable/ic_visibility_off" android:title="@string/hide_menu_bar" android:key="appdrawerHideMenuBar" />
+        <com.ss.squarehome2.preference.MyColorPreference android:title="@string/fb_color" android:key="appdrawerFBColor" android:dependency="appdrawerHideMenuBar" android:defaultValue="#E3F2FD" />
+        <com.ss.squarehome2.preference.MyCheckBoxPreference android:title="@string/disable_item_menu" android:key="appdrawerDisableItemMenu" android:summary="@string/disable_item_menu_summary" />
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>

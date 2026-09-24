@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include layout="@layout/layout_wizard_content_bg" />
+    <TableLayout android:padding="58.0dp" android:layout_width="match_parent" android:layout_height="match_parent">
+        <TableRow android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:gravity="center_horizontal" android:orientation="vertical" android:id="@id/btnHomeOptions" android:background="?android:selectableItemBackground" android:padding="8.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageView4" android:layout_width="@dimen/icon_size" android:layout_height="@dimen/icon_size" android:src="@mipmap/ic_prefs" />
+                <TextView android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/home_options" android:layout_below="@id/textViewTitle" android:layout_centerHorizontal="true" />
+            </LinearLayout>
+            <TextView android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" android:paddingLeft="16.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_options_desc" android:layout_weight="1.0" android:paddingStart="16.0dp" />
+        </TableRow>
+        <TableRow android:layout_width="match_parent" android:layout_height="wrap_content">
+            <FrameLayout android:layout_width="match_parent" android:layout_height="24.0dp" />
+        </TableRow>
+        <TableRow android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" android:gravity="center_horizontal" android:id="@id/textFAQ" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FAQ" />
+            <TextView android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" android:paddingLeft="16.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/faq_desc" android:layout_weight="1.0" android:paddingStart="16.0dp" />
+        </TableRow>
+    </TableLayout>
+</RelativeLayout>

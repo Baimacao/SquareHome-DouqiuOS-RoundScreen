@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include layout="@layout/layout_wizard_content_bg" />
+    <ScrollView android:scrollbars="none" android:paddingBottom="96.0dp" android:fillViewport="true" android:layout_width="match_parent" android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="500.0dp">
+            <FrameLayout android:background="@drawable/wp_sample" android:layout_width="150.0dp" android:layout_height="150.0dp" app:layout_constraintBottom_toTopOf="@id/checkRounded" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent">
+                <ImageView android:id="@id/imageMask" android:layout_width="match_parent" android:layout_height="match_parent" />
+                <com.ss.view.RoundedFrameLayout android:layout_gravity="right|bottom" android:id="@id/frameRound" android:layout_width="120.0dp" android:layout_height="120.0dp" android:layout_marginRight="-10.0dp" android:layout_marginBottom="-10.0dp">
+                    <ImageView android:id="@id/imagePreview" android:layout_width="150.0dp" android:layout_height="150.0dp" android:layout_marginLeft="-40.0dp" android:layout_marginTop="-40.0dp" android:src="@drawable/wp_sample" android:pivotX="0.5" android:pivotY="0.5" />
+                </com.ss.view.RoundedFrameLayout>
+                <ImageView android:layout_gravity="right|bottom" android:layout_width="80.0dp" android:layout_height="80.0dp" android:layout_marginRight="-10.0dp" android:layout_marginBottom="-10.0dp" android:src="@mipmap/ic_launcher" />
+            </FrameLayout>
+            <CheckBox android:id="@id/checkRounded" android:paddingTop="@dimen/dp24" android:paddingBottom="@dimen/dp24" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rounded" android:layout_marginStart="@dimen/dp24" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="@id/radioGroup" app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_bias="0.34" />
+            <RadioGroup android:orientation="vertical" android:id="@id/radioGroup" android:padding="@dimen/dp24" android:layout_width="wrap_content" android:layout_height="wrap_content" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/checkRounded">
+                <TextView android:textColor="?android:colorAccent" android:id="@id/textEffect" android:background="#00000000" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/background_effect" style="?android:listSeparatorTextViewStyle" />
+                <RadioButton android:id="@id/radioButton0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/disabled" />
+                <RadioButton android:id="@id/radioButton1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/blurred" />
+                <RadioButton android:id="@id/radioButton2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hollow" android:layout_weight="1.0" />
+                <RadioButton android:id="@id/radioButton3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/refraction" android:layout_weight="1.0" />
+            </RadioGroup>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</RelativeLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:layout="@layout/l_kit_layout_pref_category" android:title="DouqiuOS 適配版">
+        <Preference android:selectable="false" android:title="For：DouqiuOS 适配　By：Baimacao" android:summary="非官方修改版 · 圓屏適配 + 應用程式清單視圖調整（Square Home 3.0.1）" />
+    </PreferenceCategory>
+    <Preference android:icon="@drawable/ic_link" android:title="@string/blog" android:key="blog" android:summary="@string/official_site" />
+    <Preference android:icon="@drawable/ic_thumb_up" android:title="@string/praise" android:key="praise" android:summary="@string/praise_me" />
+    <PreferenceCategory android:layout="@layout/l_kit_layout_pref_category" android:title="@string/licenses">
+        <Preference android:layout="@layout/item_pref_summary_only" android:selectable="false" android:summary="@string/licenses_summary" />
+        <Preference android:icon="@drawable/ic_animation" android:title="android-gif-drawable" android:key="gif" android:summary="koral--" />
+        <Preference android:icon="@drawable/ic_crop" android:title="Android-Image-Cropper" android:key="crop" android:summary="CanHub" />
+        <Preference android:icon="@drawable/ic_fingerprint" android:title="reprint" android:key="reprint" android:summary="ajalt" />
+        <Preference android:icon="@drawable/ic_font" android:title="Tourney" android:key="tourney" android:summary="Tyler Finck" />
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatImageView android:id="@id/imageContentBg" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="58.0dp" android:src="@drawable/l_kit_bg_item" android:alpha="0.8"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" />
