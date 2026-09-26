@@ -53,8 +53,11 @@ public final class RoundScreenInsets {
     private static final String PREF_FIT = "douqiuRoundFit";
     private static final String PREF_COLUMN = "douqiuRoundFitColumn";
 
-    /** 列表上下边缘渐隐的长度（dp）：行滚出上边缘时淡出，而不是硬生生被切掉 */
-    private static final float FADING_EDGE_DP = 40f;
+    /** @dimen/menu_bar_height(44dp) —— 抽屉底部导航栏的高度，渐隐长度与它一致 */
+    private static final int DIMEN_MENU_BAR_HEIGHT = 0x7f07028c;
+
+    /** 取不到上面那个 dimen 时的兜底长度（dp） */
+    private static final float FADING_EDGE_DP = 44f;
 
     private RoundScreenInsets() {
     }
@@ -64,13 +67,23 @@ public final class RoundScreenInsets {
      * 注意这个 app 自己在 d0.P0() 里把它关掉了（setVerticalFadingEdgeEnabled(false)、长度 5dp），
      * 所以这里按“状态”而不是“标记”判断：被应用再改回去时，下一次滚动会自动补回来。
      * setCacheColorHint(0) 是必须的——否则渐隐区会画成实心色块，而不是透出壁纸。
+     * 长度直接取应用自己的 @dimen/menu_bar_height（底部导航栏高度），这样两者永远一致。
      */
     private static void setupFadingEdge(GridView gv, DisplayMetrics dm) {
         // 只用公开 API：getFadingEdgeLength() 是 @hide，所以按“是否已启用 + cacheColorHint”
         // 判断即可——应用在 P0() 里关掉时这两项都会变，下一次滚动就会补回来。
         if (!gv.isVerticalFadingEdgeEnabled() || gv.getCacheColorHint() != 0) {
+            int fade;
+            try {
+                fade = gv.getResources().getDimensionPixelSize(DIMEN_MENU_BAR_HEIGHT);
+            } catch (Throwable t) {
+                fade = 0;
+            }
+            if (fade <= 0) {
+                fade = Math.round(FADING_EDGE_DP * dm.density);
+            }
             gv.setCacheColorHint(0);
-            gv.setFadingEdgeLength(Math.round(FADING_EDGE_DP * dm.density));
+            gv.setFadingEdgeLength(fade);
             gv.setVerticalFadingEdgeEnabled(true);
         }
     }

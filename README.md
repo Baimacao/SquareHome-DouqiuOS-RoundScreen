@@ -48,7 +48,8 @@
 
 - 用的是 **Android 原生 fading edge**（`AbsListView` 自带能力），不是自己画的遮罩：
   app 自己在 `d0.P0()` 里把它关掉了（`setVerticalFadingEdgeEnabled(false)`，长度只给 5dp），
-  这里重新打开并设为 **40dp**（≈49px）。
+  这里重新打开，长度**直接读应用自己的 `@dimen/menu_bar_height`**（底部导航栏高度 44dp ≈ 54px），
+  所以渐隐带与底部导航栏永远一致；读不到时兜底 44dp。
 - **必须同时 `setCacheColorHint(0)`**：否则渐隐区会被画成实心色块而不是透出壁纸（老坑）。
 - 判断方式是"看状态"而不是"打标记"：一旦应用再把它关掉，下一次滚动会自动补回来。
 - **与圆屏适配开关无关**，默认就有；上下两端各有渐隐（原生 API 不支持只做一端）。
@@ -78,7 +79,7 @@ For：DouqiuOS 适配　By：Baimacao
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1_round-v6.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `476a12f61cfad5450bd0b08027a15bf3a3181c1e34c7beeb92dbe8b08a4df5f9` |
+| `apk/SquareHome_3.0.1_round-v7.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `3bfc12740005867024a559e16304ad48bd537c0352d608dbec54ae388dd8dcfb` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
