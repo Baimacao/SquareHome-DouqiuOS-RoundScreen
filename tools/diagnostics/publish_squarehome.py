@@ -115,7 +115,25 @@ def blob_sha(content):
     return h.hexdigest()
 
 
+def ensure_nonempty():
+    """空仓库不能直接用 Git Data API 建 blob（409），先用 Contents API 建一个初始提交。"""
+    global BRANCH
+    st, ref = api("GET", f"/repos/{OWNER}/{REPO}/git/ref/heads/{BRANCH}")
+    if st == 200:
+        return
+    st, repo = api("GET", f"/repos/{OWNER}/{REPO}")
+    branch = repo.get("default_branch", BRANCH) if isinstance(repo, dict) else BRANCH
+    payload = {
+        "message": "chore: init repository",
+        "content": base64.b64encode(b"# bootstrap\n").decode("ascii"),
+    }
+    st, res = api("PUT", f"/repos/{OWNER}/{REPO}/contents/.bootstrap?branch={branch}", payload)
+    print("bootstrap via Contents API ->", st, (res.get("commit", {}).get("sha") if isinstance(res, dict) else str(res)[:200]))
+    BRANCH = branch
+
+
 def cmd_publish(staging, tag, title, notes_path, asset=None):
+    ensure_nonempty()
     entries = []
     for root, _dirs, files in os.walk(staging):
         for fn in files:

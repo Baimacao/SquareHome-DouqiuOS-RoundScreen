@@ -74,7 +74,9 @@ public final class RoundScreenInsets {
             }
 
             final Context ctx = gv.getContext();
-            final boolean fit = pref(ctx, PREF_FIT, true);
+            // 预设关闭（与 res/xml/prefs_appdrawer.xml 的 defaultValue="false" 一致），
+            // 需要时由使用者在 設定 → 程式抽屜 里打开
+            final boolean fit = pref(ctx, PREF_FIT, false);
             final boolean column = fit && pref(ctx, PREF_COLUMN, false);
 
             final DisplayMetrics dm = gv.getResources().getDisplayMetrics();

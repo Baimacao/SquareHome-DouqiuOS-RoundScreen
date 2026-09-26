@@ -35,8 +35,12 @@
 - **开关**（`設定 → 程式抽屜`，紧跟「清單類型」）：
   | 开关 | key | 默认 | 作用 |
   |---|---|---|---|
-  | 圓屏適配 | `douqiuRoundFit` | 开 | 关掉 = 完全恢复原版行为 |
-  | 圓屏適配：直欄模式 | `douqiuRoundFitColumn` | 关 | 开 = 所有行对齐同一栏（不逐行贴弧） |
+  | 圓屏適配 | `douqiuRoundFit` | **关（默认不开启）** | 打开才开始收边；关掉 = 原版行为 |
+  | 圓屏適配：直欄模式 | `douqiuRoundFitColumn` | 关 | 打开 = 所有行对齐同一栏（不逐行贴弧） |
+
+  > **默认关闭**是刻意的：不动用户看到的默认观感，需要的人自己去开。
+  > 打开后有两种形状可选：默认「逐行贴弧」（每行按圆盘弦长跟随，滚动时像波浪），
+  > 或打开「直欄模式」（所有行同一栏，滚动时不动）。
 - 只影响列表模式：`getNumColumns()==1` **且** adapter 是 `com.ss.squarehome2.g0`；
   网格模式、联系人等共用 `AnimateGridView` 的界面不受影响。
 
@@ -65,7 +69,7 @@ For：DouqiuOS 适配　By：Baimacao
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1_round-v4.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `b8de6e85440c34876e0bcac7a3f0cfde7122bdc647d6fd9bf829a7bd88b51207` |
+| `apk/SquareHome_3.0.1_round-v5.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `aee93eef358aa43e4c52b3c78219781e0ade215d32c8b685c7412f1d618a5c55` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
@@ -129,7 +133,7 @@ powershell -File tools\verify_dex4.ps1   # smali 全树 diff（证明补丁面�
 
 A round-screen (480×480, R=240px) adaptation mod for **Square Home 3.0.1** on the DouqiuOS / SL8541E watch:
 
-1. **App-drawer list**: each row is shifted along the *chord of the disc* so the icon column hugs the arc;
+1. **App-drawer list** (the adaptation is **off by default**; enable it in *Settings → App drawer*): each row is
    sizes/row width unchanged, names are never squeezed away, hit rects move with the view.
    Two switches in *Settings → App drawer*: master on/off, plus a "straight column" mode.
 2. **OOBE wizard**: the corner buttons (`prev`/`next`/`finish`) were outside the disc and therefore
