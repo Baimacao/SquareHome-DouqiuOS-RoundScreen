@@ -6,21 +6,24 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
 /**
- * DouqiuOS 圆屏适配（最小版）：只做应用抽屉列表视图的收边 + 上下边缘渐隐。
+ * DouqiuOS 圆屏适配：应用抽屉列表视图的收边 + 上下边缘渐隐 + 抽屉动画流速。
  *
- * 设置（設定 → 程式抽屜 →「DouqiuOS 適配」）只有三个开关，全部用应用自己在同一页
- * 已经用过的 MySwitchPreference：
- *   douqiuRoundFit        圓屏適配        默认关；关 = 原版观感
- *   douqiuRoundFitColumn  直欄模式        默认关；开 = 所有行同一栏，关 = 逐行贴弧
- *   douqiuFade            邊緣漸隱        默认开；长度固定 = 底部导航栏高度（@dimen/menu_bar_height）
+ * 设置（設定 → 程式抽屜 →「DouqiuOS 適配」，全部用应用自己用过的 MySwitchPreference / MyIntPreference）：
+ *   douqiuRoundFit        圓屏適配      默认关；关 = 原版观感
+ *   douqiuRoundFitColumn  直欄模式      开 = 所有行同一栏
+ *   douqiuSoftCurve       柔性曲線      开 = 弧只跟到一定程度就停（行不会大幅参差）
+ *   douqiuFitStrength     貼弧強度 %    50~200（100 = 按圆弧精确计算）
+ *   douqiuFade            邊緣漸隱      默认开
+ *   douqiuFadeScale       漸隱大小 %    相对底部导航栏高度（100 = 与底栏同高）
+ *   douqiuAnimSpeed       動畫流速 %    50~200（抽屉项目动画 / 弹性回弹动画时长倍率）
  *
- * 几何：圆心用窗口坐标（display 中心 − rootView 屏幕位置），行用 offsetLeftAndRight() 平移
- * （不触发重排、命中框同步），行宽不变（应用名不会被挤掉），只影响 1 列 + g0 适配器的列表模式。
+ * 模式：关 / 貼弧（逐行跟随圆弧）/ 柔性曲線（跟随但有上限）/ 直欄（全部同一栏）。
  */
 public final class RoundScreenInsets {
 
@@ -30,12 +33,41 @@ public final class RoundScreenInsets {
     private static final int DIMEN_MENU_BAR_HEIGHT = 0x7f07028c;  // @dimen/menu_bar_height (44dp)
 
     private static final int EDGE_MARGIN = 2;
+    /** 柔性曲線的上限（≈33dp）：超过这个收边量就不再跟，行不会大幅参差 */
+    private static final float SOFT_CURVE_DP = 33f;
 
     private static final String PREF_FIT = "douqiuRoundFit";
     private static final String PREF_COLUMN = "douqiuRoundFitColumn";
+    private static final String PREF_SOFT = "douqiuSoftCurve";
+    private static final String PREF_STRENGTH = "douqiuFitStrength";
     private static final String PREF_FADE = "douqiuFade";
+    private static final String PREF_FADE_SCALE = "douqiuFadeScale";
+    private static final String PREF_ANIM = "douqiuAnimSpeed";
+
+    /** 缓存的动画倍率（给没有 Context 的钩子用） */
+    private static volatile int sAnimPercent = 100;
 
     private RoundScreenInsets() {
+    }
+
+    /** 抽屜項目動畫時長倍率（AnimateGridView 里 startAnimation 前调用） */
+    public static void scaleAnimation(Animation a) {
+        try {
+            if (a == null) {
+                return;
+            }
+            final int p = sAnimPercent;
+            if (p == 100 || p <= 0) {
+                return;
+            }
+            long d = a.getDuration();
+            if (d <= 0) {
+                d = 200;
+            }
+            final long nd = d * p / 100;
+            a.setDuration(nd < 30 ? 30 : nd);
+        } catch (Throwable t) {
+        }
     }
 
     public static void applyToGridView(GridView gv) {
@@ -56,14 +88,18 @@ public final class RoundScreenInsets {
             }
 
             final SharedPreferences sp = prefs(gv.getContext());
-            setupFadingEdge(gv, sp.getBoolean(PREF_FADE, true));
+            final int strength = clamp(readInt(sp, PREF_STRENGTH, 100), 10, 300);
+            sAnimPercent = clamp(readInt(sp, PREF_ANIM, 100), 10, 500);
 
-            final boolean fit = sp.getBoolean(PREF_FIT, false);
-            if (!fit) {                                           // 关闭：把行还原到底
+            setupFadingEdge(gv, sp.getBoolean(PREF_FADE, true),
+                    clamp(readInt(sp, PREF_FADE_SCALE, 100), 10, 300));
+
+            if (!sp.getBoolean(PREF_FIT, false)) {                 // 关闭：把行还原到底
                 resetRows(gv);
                 return;
             }
             final boolean column = sp.getBoolean(PREF_COLUMN, false);
+            final boolean soft = sp.getBoolean(PREF_SOFT, false);
 
             final DisplayMetrics dm = gv.getResources().getDisplayMetrics();
             final int w = dm.widthPixels;
@@ -73,7 +109,8 @@ public final class RoundScreenInsets {
                 return;
             }
             final double rr = (double) r * (double) r;
-            final int cap = r / 2;                                // 不把行推到屏幕中间
+            final int cap = r / 2;                                 // 不把行推到屏幕中间
+            final int softCap = Math.max(1, Math.round(SOFT_CURVE_DP * dm.density));
 
             int[] rootLoc = new int[2];
             gv.getRootView().getLocationOnScreen(rootLoc);
@@ -86,7 +123,7 @@ public final class RoundScreenInsets {
             final int cxLocal = cx - gvLoc[0];
 
             int columnGap = -1;
-            if (column) {                                         // 直栏：整段可见区取最紧弦
+            if (column) {                                          // 直栏：整段可见区取最紧弦
                 final int bandTop = gvTop + gv.getPaddingTop();
                 final int bandBottom = gvTop + gv.getHeight() - gv.getPaddingBottom();
                 int ym = Math.abs(bandTop - cy);
@@ -130,7 +167,7 @@ public final class RoundScreenInsets {
                     bandHeight = row.getHeight();
                 }
 
-                final int gap;
+                int gap;
                 if (column) {
                     gap = columnGap;
                 } else {
@@ -148,6 +185,10 @@ public final class RoundScreenInsets {
                         }
                         gap = g > cap ? cap : g;
                     }
+                }
+                gap = gap * strength / 100;                       // 貼弧強度
+                if (soft && gap > softCap) {                      // 柔性曲線
+                    gap = softCap;
                 }
 
                 int offset = gap + EDGE_MARGIN - leftInRow;
@@ -183,8 +224,8 @@ public final class RoundScreenInsets {
         }
     }
 
-    /** 原生 fading edge：长度固定 = 底部导航栏高度；关掉时恢复应用默认（关闭） */
-    private static void setupFadingEdge(GridView gv, boolean on) {
+    /** 原生 fading edge：长度 = 底部导航栏高度 × fadeScale%；关掉时恢复应用默认（关闭） */
+    private static void setupFadingEdge(GridView gv, boolean on, int scalePercent) {
         if (!on) {
             if (gv.isVerticalFadingEdgeEnabled()) {
                 gv.setVerticalFadingEdgeEnabled(false);
@@ -192,22 +233,43 @@ public final class RoundScreenInsets {
             return;
         }
         if (!gv.isVerticalFadingEdgeEnabled() || gv.getCacheColorHint() != 0) {
-            int fade;
+            int bar;
             try {
-                fade = gv.getResources().getDimensionPixelSize(DIMEN_MENU_BAR_HEIGHT);
+                bar = gv.getResources().getDimensionPixelSize(DIMEN_MENU_BAR_HEIGHT);
             } catch (Throwable t) {
-                fade = 0;
+                bar = 0;
             }
-            if (fade <= 0) {
-                fade = Math.round(44f * gv.getResources().getDisplayMetrics().density);
+            if (bar <= 0) {
+                bar = Math.round(44f * gv.getResources().getDisplayMetrics().density);
             }
             gv.setCacheColorHint(0);      // 不设这个，渐隐区会画成实心色块
-            gv.setFadingEdgeLength(fade);
+            gv.setFadingEdgeLength(Math.max(1, bar * scalePercent / 100));
             gv.setVerticalFadingEdgeEnabled(true);
         }
     }
 
     private static SharedPreferences prefs(Context ctx) {
         return ctx.getSharedPreferences(ctx.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+    }
+
+    private static int readInt(SharedPreferences sp, String key, int def) {
+        try {
+            final Object v = sp.getAll().get(key);
+            if (v instanceof Integer) {
+                return ((Integer) v).intValue();
+            }
+            if (v instanceof String) {
+                return Integer.parseInt(((String) v).trim());
+            }
+            if (v instanceof Long) {
+                return ((Long) v).intValue();
+            }
+        } catch (Throwable t) {
+        }
+        return def;
+    }
+
+    private static int clamp(int v, int lo, int hi) {
+        return v < lo ? lo : (v > hi ? hi : v);
     }
 }

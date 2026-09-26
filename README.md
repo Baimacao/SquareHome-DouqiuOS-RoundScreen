@@ -125,7 +125,7 @@ For：DouqiuOS 适配　By：Baimacao
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1-douqiuos-v11-mod.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `abcf8efec2ed9576ac6a53a29e758f781489dd50d6f52c31843710d7b85072d8` |
+| `apk/SquareHome_3.0.1-douqiuos-v12-mod.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `bf71af75ed8cc9c71e2b6a90343b36c13dbbd5eeec6a2097dfa31a71e32f7147` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
