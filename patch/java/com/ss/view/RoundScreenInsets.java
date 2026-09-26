@@ -53,7 +53,26 @@ public final class RoundScreenInsets {
     private static final String PREF_FIT = "douqiuRoundFit";
     private static final String PREF_COLUMN = "douqiuRoundFitColumn";
 
+    /** 列表上下边缘渐隐的长度（dp）：行滚出上边缘时淡出，而不是硬生生被切掉 */
+    private static final float FADING_EDGE_DP = 40f;
+
     private RoundScreenInsets() {
+    }
+
+    /**
+     * 打开列表的原生渐隐边（AbsListView 自带能力）。
+     * 注意这个 app 自己在 d0.P0() 里把它关掉了（setVerticalFadingEdgeEnabled(false)、长度 5dp），
+     * 所以这里按“状态”而不是“标记”判断：被应用再改回去时，下一次滚动会自动补回来。
+     * setCacheColorHint(0) 是必须的——否则渐隐区会画成实心色块，而不是透出壁纸。
+     */
+    private static void setupFadingEdge(GridView gv, DisplayMetrics dm) {
+        // 只用公开 API：getFadingEdgeLength() 是 @hide，所以按“是否已启用 + cacheColorHint”
+        // 判断即可——应用在 P0() 里关掉时这两项都会变，下一次滚动就会补回来。
+        if (!gv.isVerticalFadingEdgeEnabled() || gv.getCacheColorHint() != 0) {
+            gv.setCacheColorHint(0);
+            gv.setFadingEdgeLength(Math.round(FADING_EDGE_DP * dm.density));
+            gv.setVerticalFadingEdgeEnabled(true);
+        }
     }
 
     public static void applyToGridView(GridView gv) {
@@ -80,6 +99,7 @@ public final class RoundScreenInsets {
             final boolean column = fit && pref(ctx, PREF_COLUMN, false);
 
             final DisplayMetrics dm = gv.getResources().getDisplayMetrics();
+            setupFadingEdge(gv, dm);                       // 滚出上/下边缘时渐隐（与适配开关无关）
             final int w = dm.widthPixels;
             final int h = dm.heightPixels;
             final int r = Math.min(w, h) / 2;

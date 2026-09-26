@@ -44,6 +44,15 @@
 - 只影响列表模式：`getNumColumns()==1` **且** adapter 是 `com.ss.squarehome2.g0`；
   网格模式、联系人等共用 `AnimateGridView` 的界面不受影响。
 
+### 1b. 列表上下边缘渐隐（"翻出时淡化"）
+
+- 用的是 **Android 原生 fading edge**（`AbsListView` 自带能力），不是自己画的遮罩：
+  app 自己在 `d0.P0()` 里把它关掉了（`setVerticalFadingEdgeEnabled(false)`，长度只给 5dp），
+  这里重新打开并设为 **40dp**（≈49px）。
+- **必须同时 `setCacheColorHint(0)`**：否则渐隐区会被画成实心色块而不是透出壁纸（老坑）。
+- 判断方式是"看状态"而不是"打标记"：一旦应用再把它关掉，下一次滚动会自动补回来。
+- **与圆屏适配开关无关**，默认就有；上下两端各有渐隐（原生 API 不支持只做一端）。
+
 ### 2. OOBE（首次设置精靈）圆屏适配
 
 - **底部按钮**：`上一頁` / `下一頁` / `完成` 原本钉在屏幕四角（实测 `y≈450, x=37..71 / 410..444`），
@@ -69,7 +78,7 @@ For：DouqiuOS 适配　By：Baimacao
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1_round-v5.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `aee93eef358aa43e4c52b3c78219781e0ade215d32c8b685c7412f1d618a5c55` |
+| `apk/SquareHome_3.0.1_round-v6.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `476a12f61cfad5450bd0b08027a15bf3a3181c1e34c7beeb92dbe8b08a4df5f9` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
