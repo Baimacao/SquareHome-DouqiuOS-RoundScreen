@@ -115,17 +115,17 @@ For：DouqiuOS 适配　By：Baimacao
 在最底层循环播放本地视频当壁纸，跳过应用自绘壁纸；**不走系统 Live Wallpaper 服务**（手表没有），
 也没有打包 FFmpeg（FFmpeg 在 Android 上的硬解同样转调 MediaCodec）。
 
-## mod 式（v10，推荐）
+## mod 式 / 仅圆屏适配（v11，推荐）
 
-以**原包**为基底，只替换 3 个 dex + manifest + 6 个资源文件（共 10 个条目），
-`resources.arsc` 逐字节不动 ⇒ 改动面可逐条核对。代价：**不含汉化补全**（汉化必须重编译资源表，
-用 v9）。设置项、OOBE 适配、视频壁纸、版本名都在。
+以**原包**为基底，只替换 2 个 dex + manifest + 6 个资源文件（共 9 个条目），`resources.arsc` 逐字节不动。
+只做应用抽屉列表的圆屏收边（贴弧/直栏）与上下边缘渐隐；设置页只用应用验证过的 `MySwitchPreference`。
+不含汉化补全（那需要重编译资源表）。
 
 ## 产物
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1-douqiuos-v10-mod.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `089af0eff2d27d343292f12636bfd77c29957839ae107520a98bf4851ad9496b` |
+| `apk/SquareHome_3.0.1-douqiuos-v11-mod.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `abcf8efec2ed9576ac6a53a29e758f781489dd50d6f52c31843710d7b85072d8` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |

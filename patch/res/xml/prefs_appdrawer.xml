@@ -5,12 +5,7 @@
     <PreferenceCategory android:layout="@layout/l_kit_layout_pref_category" android:title="DouqiuOS 適配">
         <com.ss.squarehome2.preference.MySwitchPreference android:title="圓屏適配" android:summary="列表依圓弧收邊，避免被圓屏切掉（預設關閉）" android:key="douqiuRoundFit" android:defaultValue="false" />
         <com.ss.squarehome2.preference.MySwitchPreference android:title="直欄模式" android:summary="所有行對齊同一欄，不再逐行貼弧" android:key="douqiuRoundFitColumn" android:defaultValue="false" android:dependency="douqiuRoundFit" />
-        <com.ss.squarehome2.preference.MyIntPreference android:title="貼弧強度" android:summary="收邊幅度，100% = 依圓弧精確計算" android:key="douqiuFitStrength" android:defaultValue="100" />
-        <com.ss.squarehome2.preference.MySwitchPreference android:title="邊緣漸隱" android:summary="項目滾出上／下邊緣時淡出" android:key="douqiuFade" android:defaultValue="true" />
-        <com.ss.squarehome2.preference.MyIntPreference android:title="漸隱大小" android:summary="相對底部導覽列高度，100% = 與導覽列同高" android:key="douqiuFadeScale" android:defaultValue="100" android:dependency="douqiuFade" />
-        <com.ss.squarehome2.preference.MyIntPreference android:title="動畫流速" android:summary="抽屜項目動畫時長倍率，100% = 原速" android:key="douqiuAnimSpeed" android:defaultValue="100" />
-        <com.ss.squarehome2.preference.MySwitchPreference android:title="視頻壁紙" android:summary="應用內硬解循環播放本地視頻當壁紙（MediaCodec）" android:key="douqiuVideoWallpaper" android:defaultValue="false" />
-        <com.ss.preferencex.EditTextPreference android:title="視頻檔案路徑" android:summary="例：/sdcard/SquareHome2/wallpaper.mp4，留空則自動尋找" android:key="douqiuVideoPath" android:defaultValue="" android:dependency="douqiuVideoWallpaper" />
+        <com.ss.squarehome2.preference.MySwitchPreference android:title="邊緣漸隱" android:summary="項目滾出上／下邊緣時淡出（長度同底部導覽列）" android:key="douqiuFade" android:defaultValue="true" />
     </PreferenceCategory>
     <com.ss.squarehome2.preference.MyIntPreference android:title="@string/text_size" android:key="appdrawerListTextSize" android:dependency="appdrawerListType" android:defaultValue="100" />
     <com.ss.squarehome2.preference.PersistentTypefacePreference android:title="@string/typeface" android:key="appdrawerListTypeface" android:dependency="appdrawerListType" />

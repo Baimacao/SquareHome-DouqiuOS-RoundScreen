@@ -1,83 +1,43 @@
 package com.ss.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
 /**
- * DouqiuOS tuning for Square Home's app-drawer list view.
+ * DouqiuOS 圆屏适配（最小版）：只做应用抽屉列表视图的收边 + 上下边缘渐隐。
  *
- * 全部行为都由 設定 → 程式抽屜 →「DouqiuOS 適配」里的选项控制（写进应用默认 SharedPreferences）：
- *   douqiuFitMode      0=關閉(默认) 1=貼弧 2=直欄
- *   douqiuFitStrength  貼弧/直欄 的收邊強度 %（默认 100，范围 50~200，由 MyIntPreference 提供）
- *   douqiuFade         邊緣漸隱 開/關（默认开）
- *   douqiuFadeScale    漸隱長度 = 底部導覽列高度 × 這個百分比（默认 100% = 与底栏一致）
- *   douqiuAnimSpeed    抽屜項目動畫時長倍率 %（默认 100）
- *   douqiuVideoWallpaper 視頻壁紙：應用內 MediaPlayer(MediaCodec 硬解)+SurfaceView 循環播放本地視頻
- *   douqiuVideoPath      視頻路徑（留空則自動找 /sdcard/SquareHome2/wallpaper.mp4 等）
+ * 设置（設定 → 程式抽屜 →「DouqiuOS 適配」）只有三个开关，全部用应用自己在同一页
+ * 已经用过的 MySwitchPreference：
+ *   douqiuRoundFit        圓屏適配        默认关；关 = 原版观感
+ *   douqiuRoundFitColumn  直欄模式        默认关；开 = 所有行同一栏，关 = 逐行贴弧
+ *   douqiuFade            邊緣漸隱        默认开；长度固定 = 底部导航栏高度（@dimen/menu_bar_height）
  *
- * 几何说明见 README：圆心用窗口坐标（display 中心 − rootView 屏幕位置），
- * 行用 offsetLeftAndRight() 平移（不触发重排、命中框同步），行宽不变。
+ * 几何：圆心用窗口坐标（display 中心 − rootView 屏幕位置），行用 offsetLeftAndRight() 平移
+ * （不触发重排、命中框同步），行宽不变（应用名不会被挤掉），只影响 1 列 + g0 适配器的列表模式。
  */
 public final class RoundScreenInsets {
 
     private static final String LIST_ADAPTER = "com.ss.squarehome2.g0";
-    private static final int ID_FRAME_ICON = 0x7f090141;   // @id/frameIcon
-    private static final int ID_TEXT_LABEL = 0x7f0902ec;   // @id/textLabel
+    private static final int ID_FRAME_ICON = 0x7f090141;          // @id/frameIcon
+    private static final int ID_TEXT_LABEL = 0x7f0902ec;          // @id/textLabel
     private static final int DIMEN_MENU_BAR_HEIGHT = 0x7f07028c;  // @dimen/menu_bar_height (44dp)
 
     private static final int EDGE_MARGIN = 2;
 
-    private static final String PREF_MODE = "douqiuFitMode";
-    private static final String PREF_STRENGTH = "douqiuFitStrength";
+    private static final String PREF_FIT = "douqiuRoundFit";
+    private static final String PREF_COLUMN = "douqiuRoundFitColumn";
     private static final String PREF_FADE = "douqiuFade";
-    private static final String PREF_FADE_SCALE = "douqiuFadeScale";
-    private static final String PREF_ANIM = "douqiuAnimSpeed";
-    private static final String PREF_VIDEO = "douqiuVideoWallpaper";
-    private static final String PREF_VIDEO_PATH = "douqiuVideoPath";
-
-    /** 缓存的动画倍率 / 动态壁纸开关（给没有 Context 的钩子用） */
-    private static volatile int sAnimPercent = 100;
-    private static volatile boolean sSkipWallpaper = false;
 
     private RoundScreenInsets() {
     }
 
-    // ------------------------------------------------------------------ 供 smali 钩子调用
-    /** 抽屜項目動畫時長倍率（AnimateGridView 里 startAnimation 前调用） */
-    public static void scaleAnimation(Animation a) {
-        try {
-            if (a == null) {
-                return;
-            }
-            final int p = sAnimPercent;
-            if (p == 100 || p <= 0) {
-                return;
-            }
-            long d = a.getDuration();
-            if (d <= 0) {
-                d = 200;
-            }
-            long nd = d * p / 100;
-            a.setDuration(nd < 30 ? 30 : nd);
-        } catch (Throwable t) {
-        }
-    }
-
-    /** 视频壁纸模式下跳过应用自绘壁纸（fk.k(Canvas) 开头调用） */
-    public static boolean skipWallpaper() {
-        return sSkipWallpaper;
-    }
-
-    // ------------------------------------------------------------------ 主流程
     public static void applyToGridView(GridView gv) {
         if (gv == null) {
             return;
@@ -87,7 +47,7 @@ public final class RoundScreenInsets {
             if (count <= 0) {
                 return;
             }
-            if (gv.getNumColumns() != 1) {                 // 列表模式专用
+            if (gv.getNumColumns() != 1) {                        // 列表模式专用
                 return;
             }
             ListAdapter adapter = gv.getAdapter();
@@ -95,28 +55,17 @@ public final class RoundScreenInsets {
                 return;
             }
 
-            final Context ctx = gv.getContext();
-            final SharedPreferences sp = prefs(ctx);
-            final int mode = resolveMode(sp);                     // 0 off / 1 arc / 2 column
-            final int strength = clamp(readInt(sp, PREF_STRENGTH, 100), 10, 300);
-            final boolean fadeOn = sp.getBoolean(PREF_FADE, true);
-            final int fadeScale = clamp(readInt(sp, PREF_FADE_SCALE, 100), 10, 300);
-            sAnimPercent = clamp(readInt(sp, PREF_ANIM, 100), 10, 500);
-            // 视频壁纸：开着就跳过应用自绘壁纸，并让 DouqiuVideoWallpaper 在最底层放视频
-            final boolean videoOn = sp.getBoolean(PREF_VIDEO, false);
-            final String videoPath = sp.getString(PREF_VIDEO_PATH, "");
-            sSkipWallpaper = videoOn;
-            if (ctx instanceof Activity) {
-                DouqiuVideoWallpaper.apply((Activity) ctx, videoOn, videoPath);
-            }
+            final SharedPreferences sp = prefs(gv.getContext());
+            setupFadingEdge(gv, sp.getBoolean(PREF_FADE, true));
 
-            final DisplayMetrics dm = gv.getResources().getDisplayMetrics();
-            setupFadingEdge(gv, dm, fadeOn, fadeScale);
-            if (mode == 0) {                               // 关闭：把行还原到底
+            final boolean fit = sp.getBoolean(PREF_FIT, false);
+            if (!fit) {                                           // 关闭：把行还原到底
                 resetRows(gv);
                 return;
             }
+            final boolean column = sp.getBoolean(PREF_COLUMN, false);
 
+            final DisplayMetrics dm = gv.getResources().getDisplayMetrics();
             final int w = dm.widthPixels;
             final int h = dm.heightPixels;
             final int r = Math.min(w, h) / 2;
@@ -124,7 +73,7 @@ public final class RoundScreenInsets {
                 return;
             }
             final double rr = (double) r * (double) r;
-            final int cap = r / 2;
+            final int cap = r / 2;                                // 不把行推到屏幕中间
 
             int[] rootLoc = new int[2];
             gv.getRootView().getLocationOnScreen(rootLoc);
@@ -134,11 +83,10 @@ public final class RoundScreenInsets {
             int[] gvLoc = new int[2];
             gv.getLocationInWindow(gvLoc);
             final int gvTop = gvLoc[1];
-            final int gvLeft = gvLoc[0];
-            final int cxLocal = cx - gvLeft;
+            final int cxLocal = cx - gvLoc[0];
 
             int columnGap = -1;
-            if (mode == 2) {
+            if (column) {                                         // 直栏：整段可见区取最紧弦
                 final int bandTop = gvTop + gv.getPaddingTop();
                 final int bandBottom = gvTop + gv.getHeight() - gv.getPaddingBottom();
                 int ym = Math.abs(bandTop - cy);
@@ -182,8 +130,8 @@ public final class RoundScreenInsets {
                     bandHeight = row.getHeight();
                 }
 
-                int gap;
-                if (mode == 2) {
+                final int gap;
+                if (column) {
                     gap = columnGap;
                 } else {
                     final int bandTop = gvTop + row.getTop() + topInRow;
@@ -201,13 +149,11 @@ public final class RoundScreenInsets {
                         gap = g > cap ? cap : g;
                     }
                 }
-                gap = gap * strength / 100;                 // 曲率强度
 
                 int offset = gap + EDGE_MARGIN - leftInRow;
                 if (offset < 0) {
                     offset = 0;
                 }
-
                 final int want = gv.getPaddingLeft() + offset;
                 final int cur = row.getLeft();
                 if (want != cur) {
@@ -227,7 +173,6 @@ public final class RoundScreenInsets {
         }
     }
 
-    // ------------------------------------------------------------------ 内部
     private static void resetRows(GridView gv) {
         final int base = gv.getPaddingLeft();
         for (int i = 0; i < gv.getChildCount(); i++) {
@@ -238,26 +183,25 @@ public final class RoundScreenInsets {
         }
     }
 
-    /** 渐隐边：长度 = 底栏高度 × fadeScale%；关掉时恢复应用默认（关闭） */
-    private static void setupFadingEdge(GridView gv, DisplayMetrics dm, boolean on, int scalePercent) {
+    /** 原生 fading edge：长度固定 = 底部导航栏高度；关掉时恢复应用默认（关闭） */
+    private static void setupFadingEdge(GridView gv, boolean on) {
         if (!on) {
             if (gv.isVerticalFadingEdgeEnabled()) {
                 gv.setVerticalFadingEdgeEnabled(false);
             }
             return;
         }
-        int bar;
-        try {
-            bar = gv.getResources().getDimensionPixelSize(DIMEN_MENU_BAR_HEIGHT);
-        } catch (Throwable t) {
-            bar = 0;
-        }
-        if (bar <= 0) {
-            bar = Math.round(44f * dm.density);
-        }
-        final int fade = Math.max(1, bar * scalePercent / 100);
         if (!gv.isVerticalFadingEdgeEnabled() || gv.getCacheColorHint() != 0) {
-            gv.setCacheColorHint(0);
+            int fade;
+            try {
+                fade = gv.getResources().getDimensionPixelSize(DIMEN_MENU_BAR_HEIGHT);
+            } catch (Throwable t) {
+                fade = 0;
+            }
+            if (fade <= 0) {
+                fade = Math.round(44f * gv.getResources().getDisplayMetrics().density);
+            }
+            gv.setCacheColorHint(0);      // 不设这个，渐隐区会画成实心色块
             gv.setFadingEdgeLength(fade);
             gv.setVerticalFadingEdgeEnabled(true);
         }
@@ -265,43 +209,5 @@ public final class RoundScreenInsets {
 
     private static SharedPreferences prefs(Context ctx) {
         return ctx.getSharedPreferences(ctx.getPackageName() + "_preferences", Context.MODE_PRIVATE);
-    }
-
-    /**
-     * 适配模式：优先读 douqiuFitMode（完整版用的列表偏好，值是 int 或 String），
-     * 没有的话退回两个开关 douqiuRoundFit / douqiuRoundFitColumn（mod 式版用，
-     * 因为 mod 式不加新资源，没法用需要 @array 的 ListPreference）。
-     */
-    private static int resolveMode(SharedPreferences sp) {
-        final int m = readInt(sp, PREF_MODE, -1);
-        if (m >= 0) {
-            return m > 2 ? 2 : m;
-        }
-        if (!sp.getBoolean("douqiuRoundFit", false)) {
-            return 0;
-        }
-        return sp.getBoolean("douqiuRoundFitColumn", false) ? 2 : 1;
-    }
-
-    /** MyIntPreference 存 int；MyListPreference 存 String —— 两种都兼容 */
-    private static int readInt(SharedPreferences sp, String key, int def) {
-        try {
-            final Object v = sp.getAll().get(key);
-            if (v instanceof Integer) {
-                return ((Integer) v).intValue();
-            }
-            if (v instanceof String) {
-                return Integer.parseInt(((String) v).trim());
-            }
-            if (v instanceof Long) {
-                return ((Long) v).intValue();
-            }
-        } catch (Throwable t) {
-        }
-        return def;
-    }
-
-    private static int clamp(int v, int lo, int hi) {
-        return v < lo ? lo : (v > hi ? hi : v);
     }
 }
