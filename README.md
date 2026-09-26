@@ -75,11 +75,45 @@ For：DouqiuOS 适配　By：Baimacao
 非官方修改版 · 圓屏適配 + 應用程式清單視圖調整（Square Home 3.0.1）
 ```
 
+
+### 4. DouqiuOS 可调设置（v8 新增，`設定 → 程式抽屜`）
+
+`prefs_appdrawer.xml` 里新增「DouqiuOS 適配」分组，全部写进应用默认 SharedPreferences：
+
+| 选项 | key | 默认 | 说明 |
+|---|---|---|---|
+| 圓屏適配（模式） | `douqiuFitMode` | 0 = 關閉 | 0 關閉 / 1 貼弧 / 2 直欄 |
+| 貼弧強度 | `douqiuFitStrength` | 100 % | 收邊幅度倍率（50~200%，`MyIntPreference` 提供对话框） |
+| 邊緣漸隱 | `douqiuFade` | 開 | 項目滾出上/下邊緣時淡出 |
+| 漸隱大小 | `douqiuFadeScale` | 100 % | **相對底部導覽列高度**（`@dimen/menu_bar_height`），100% = 与底栏一致 |
+| 動畫流速 | `douqiuAnimSpeed` | 100 % | 抽屜項目動畫 / 彈性回彈動畫的時長倍率 |
+| 動態桌布支援 | `douqiuLiveWallpaper` | 關 | 開：改由系統繪製壁紙（含動態壁紙），本應用不再自繪；關：原行為 |
+
+实现：`RoundScreenInsets` 每帧读这些偏好；動畫流速挂在 `AnimateGridView.t()` /
+`AnimateGridView$a.onScroll()` 的 `startAnimation` 前；動態壁紙则挂 `fk.k(Canvas)`（跳过自绘）
+并给窗口加 `FLAG_SHOW_WALLPAPER` + 透明背景。
+
+### 5. 汉化补全（v8）
+
+原版 zh-rTW 缺 **66 条**、zh-rCN 缺 20 条 app 自己的文案（会回退成英文），v8 全部补齐
+（品牌名 `app_name`、URL、`@string` 引用按惯例不动）。判据：`mc`（R.string 类）里 app 实际引用、
+但 `values-zh-rTW` 没有值的条目。
+
+### 6. 版本号：DouqiuOS 定制分支（v8）
+
+`AndroidManifest.xml` 的 `versionName` → **`3.0.1-douqiuos`**（`versionCode` 保持 `30001`，
+这样可以直接覆盖安装，不必卸载）。manifest 结构经 `aapt2 dump xmltree` 对比，与原包**只差这一处**。
+
+> ⚠️ 注意：v8 为了让「汉化 + 新设置项」进入资源表，改为**整包资源重编译**（apktool + aapt2）。
+> 资源表经逐条对比（忽略 apktool 的 `PUBLIC` 标记与 aapt2 合并的冗余 `-v4/-v21` 限定符）：
+> 差异只有「我新增的字符串/数组」与「40 个 `$` 前缀的库内 AVD 资源改名」（ID 不变，
+> 见下）。manifest 只差 versionName。dex 侧仍只动 3 个文件。
+
 ## 产物
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1_round-v7.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `3bfc12740005867024a559e16304ad48bd537c0352d608dbec54ae388dd8dcfb` |
+| `apk/SquareHome_3.0.1-douqiuos-v8.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `e5475c423bf7bb0b96753d753ee1928096e8a0a09f3dab5206348a6c98807f55` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
