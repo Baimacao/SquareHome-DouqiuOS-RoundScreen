@@ -8,7 +8,8 @@
         <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/douqiu_fade_title" android:summary="@string/douqiu_fade_summary" android:key="douqiuFade" android:defaultValue="true" />
         <com.ss.squarehome2.preference.MyIntPreference android:title="@string/douqiu_fade_scale_title" android:summary="@string/douqiu_fade_scale_summary" android:key="douqiuFadeScale" android:defaultValue="100" android:dependency="douqiuFade" />
         <com.ss.squarehome2.preference.MyIntPreference android:title="@string/douqiu_anim_title" android:summary="@string/douqiu_anim_summary" android:key="douqiuAnimSpeed" android:defaultValue="100" />
-        <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/douqiu_lwp_title" android:summary="@string/douqiu_lwp_summary" android:key="douqiuLiveWallpaper" android:defaultValue="false" />
+        <com.ss.squarehome2.preference.MySwitchPreference android:title="@string/douqiu_video_title" android:summary="@string/douqiu_video_summary" android:key="douqiuVideoWallpaper" android:defaultValue="false" />
+        <com.ss.preferencex.EditTextPreference android:title="@string/douqiu_video_path_title" android:summary="@string/douqiu_video_path_summary" android:key="douqiuVideoPath" android:defaultValue="" android:dependency="douqiuVideoWallpaper" />
     </PreferenceCategory>
     <com.ss.squarehome2.preference.MyIntPreference android:title="@string/text_size" android:key="appdrawerListTextSize" android:dependency="appdrawerListType" android:defaultValue="100" />
     <com.ss.squarehome2.preference.PersistentTypefacePreference android:title="@string/typeface" android:key="appdrawerListTypeface" android:dependency="appdrawerListType" />

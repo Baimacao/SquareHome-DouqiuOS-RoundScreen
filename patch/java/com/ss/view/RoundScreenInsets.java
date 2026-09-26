@@ -3,12 +3,10 @@ package com.ss.view;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.GridView;
 import android.widget.ListAdapter;
@@ -23,7 +21,8 @@ import android.widget.TextView;
  *   douqiuFade         邊緣漸隱 開/關（默认开）
  *   douqiuFadeScale    漸隱長度 = 底部導覽列高度 × 這個百分比（默认 100% = 与底栏一致）
  *   douqiuAnimSpeed    抽屜項目動畫時長倍率 %（默认 100）
- *   douqiuLiveWallpaper 動態壁紙：改由系統繪製壁紙（含動態壁紙），本應用程式不再自繪
+ *   douqiuVideoWallpaper 視頻壁紙：應用內 MediaPlayer(MediaCodec 硬解)+SurfaceView 循環播放本地視頻
+ *   douqiuVideoPath      視頻路徑（留空則自動找 /sdcard/SquareHome2/wallpaper.mp4 等）
  *
  * 几何说明见 README：圆心用窗口坐标（display 中心 − rootView 屏幕位置），
  * 行用 offsetLeftAndRight() 平移（不触发重排、命中框同步），行宽不变。
@@ -42,7 +41,8 @@ public final class RoundScreenInsets {
     private static final String PREF_FADE = "douqiuFade";
     private static final String PREF_FADE_SCALE = "douqiuFadeScale";
     private static final String PREF_ANIM = "douqiuAnimSpeed";
-    private static final String PREF_LWP = "douqiuLiveWallpaper";
+    private static final String PREF_VIDEO = "douqiuVideoWallpaper";
+    private static final String PREF_VIDEO_PATH = "douqiuVideoPath";
 
     /** 缓存的动画倍率 / 动态壁纸开关（给没有 Context 的钩子用） */
     private static volatile int sAnimPercent = 100;
@@ -72,7 +72,7 @@ public final class RoundScreenInsets {
         }
     }
 
-    /** 动态壁纸模式下跳过应用自绘壁纸（fk.k(Canvas) 开头调用） */
+    /** 视频壁纸模式下跳过应用自绘壁纸（fk.k(Canvas) 开头调用） */
     public static boolean skipWallpaper() {
         return sSkipWallpaper;
     }
@@ -102,8 +102,13 @@ public final class RoundScreenInsets {
             final boolean fadeOn = sp.getBoolean(PREF_FADE, true);
             final int fadeScale = clamp(readInt(sp, PREF_FADE_SCALE, 100), 10, 300);
             sAnimPercent = clamp(readInt(sp, PREF_ANIM, 100), 10, 500);
-            sSkipWallpaper = sp.getBoolean(PREF_LWP, false);
-            applyWindow(ctx);
+            // 视频壁纸：开着就跳过应用自绘壁纸，并让 DouqiuVideoWallpaper 在最底层放视频
+            final boolean videoOn = sp.getBoolean(PREF_VIDEO, false);
+            final String videoPath = sp.getString(PREF_VIDEO_PATH, "");
+            sSkipWallpaper = videoOn;
+            if (ctx instanceof Activity) {
+                DouqiuVideoWallpaper.apply((Activity) ctx, videoOn, videoPath);
+            }
 
             final DisplayMetrics dm = gv.getResources().getDisplayMetrics();
             setupFadingEdge(gv, dm, fadeOn, fadeScale);
@@ -255,26 +260,6 @@ public final class RoundScreenInsets {
             gv.setCacheColorHint(0);
             gv.setFadingEdgeLength(fade);
             gv.setVerticalFadingEdgeEnabled(true);
-        }
-    }
-
-    /** 动态壁纸：让系统画壁纸（含 LWP），本应用不再自绘 */
-    private static void applyWindow(Context ctx) {
-        try {
-            if (!(ctx instanceof Activity)) {
-                return;
-            }
-            final Activity a = (Activity) ctx;
-            final boolean on = sSkipWallpaper;
-            final boolean has = (a.getWindow().getAttributes().flags
-                    & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0;
-            if (on && !has) {
-                a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
-                a.getWindow().setBackgroundDrawable(new ColorDrawable(0));
-            } else if (!on && has) {
-                a.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
-            }
-        } catch (Throwable t) {
         }
     }
 

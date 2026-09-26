@@ -109,11 +109,17 @@ For：DouqiuOS 适配　By：Baimacao
 > 差异只有「我新增的字符串/数组」与「40 个 `$` 前缀的库内 AVD 资源改名」（ID 不变，
 > 见下）。manifest 只差 versionName。dex 侧仍只动 3 个文件。
 
+### 7. 应用内视频壁纸（v9）
+
+`視頻壁紙` 开关 + `視頻檔案路徑`：用 `MediaPlayer`（MediaCodec 硬解）+ `SurfaceView`
+在最底层循环播放本地视频当壁纸，跳过应用自绘壁纸；**不走系统 Live Wallpaper 服务**（手表没有），
+也没有打包 FFmpeg（FFmpeg 在 Android 上的硬解同样转调 MediaCodec）。
+
 ## 产物
 
 | 文件 | 说明 |
 |---|---|
-| `apk/SquareHome_3.0.1-douqiuos-v8.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `e5475c423bf7bb0b96753d753ee1928096e8a0a09f3dab5206348a6c98807f55` |
+| `apk/SquareHome_3.0.1-douqiuos-v9.apk` | 已签名（v1+v2+v3），可直接安装<br>sha256 `245c796ace51fe4a8cd14efd2c62019a6e96a752d5ce835edf6bd52c347eeec5` |
 | `patch/java/…/RoundScreenInsets.java` | 圆屏几何 + 开关（约 200 行） |
 | `patch/res/…` | 改过的资源源文件（6 个：About/抽屉设置 XML + 4 个精靈布局） |
 | `docs/patch-hooks.md` | smali 钩子落点与定位方法 |
