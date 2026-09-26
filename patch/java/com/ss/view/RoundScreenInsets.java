@@ -97,7 +97,7 @@ public final class RoundScreenInsets {
 
             final Context ctx = gv.getContext();
             final SharedPreferences sp = prefs(ctx);
-            final int mode = readInt(sp, PREF_MODE, 0);            // 0 off / 1 arc / 2 column
+            final int mode = resolveMode(sp);                     // 0 off / 1 arc / 2 column
             final int strength = clamp(readInt(sp, PREF_STRENGTH, 100), 10, 300);
             final boolean fadeOn = sp.getBoolean(PREF_FADE, true);
             final int fadeScale = clamp(readInt(sp, PREF_FADE_SCALE, 100), 10, 300);
@@ -265,6 +265,22 @@ public final class RoundScreenInsets {
 
     private static SharedPreferences prefs(Context ctx) {
         return ctx.getSharedPreferences(ctx.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+    }
+
+    /**
+     * 适配模式：优先读 douqiuFitMode（完整版用的列表偏好，值是 int 或 String），
+     * 没有的话退回两个开关 douqiuRoundFit / douqiuRoundFitColumn（mod 式版用，
+     * 因为 mod 式不加新资源，没法用需要 @array 的 ListPreference）。
+     */
+    private static int resolveMode(SharedPreferences sp) {
+        final int m = readInt(sp, PREF_MODE, -1);
+        if (m >= 0) {
+            return m > 2 ? 2 : m;
+        }
+        if (!sp.getBoolean("douqiuRoundFit", false)) {
+            return 0;
+        }
+        return sp.getBoolean("douqiuRoundFitColumn", false) ? 2 : 1;
     }
 
     /** MyIntPreference 存 int；MyListPreference 存 String —— 两种都兼容 */
